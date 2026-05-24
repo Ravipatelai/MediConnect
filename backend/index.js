@@ -28,7 +28,7 @@ connectDB();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "http://localhost:5174"],
     credentials: true,
   })
 );
@@ -64,6 +64,7 @@ app.use("/api/appointment", appointmentRoute);
 app.use("/api/admin", adminRoutes);
 app.use("/api/patient", patientRoutes);
 
+
 // ==============================
 // 404 Route
 // ==============================
@@ -79,7 +80,7 @@ app.use((req, res) => {
 // Server Start
 // ==============================
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5002;
 
 app.listen(PORT, () => {
   console.log(

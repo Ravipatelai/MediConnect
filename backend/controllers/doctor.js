@@ -2,7 +2,8 @@ const Doctor = require("../models/doctor");
 const User = require("../models/user");
 const Earning = require("../models/earning");
 const Appointment = require("../models/appointment");
-const Review = require('../models/review')
+const Review = require('../models/review');
+const bcrypt = require("bcryptjs");
 
 const addDoctorDetails = async (req, res) => {
   try {
@@ -14,7 +15,7 @@ const addDoctorDetails = async (req, res) => {
         .json({ error: "Experience and slots are required." });
     }
 
-    const user = await User.findById(req.user.userId);
+    const user = await User.findById(req.user._id);
 
     if (!user || user.role !== "doctor") {
       return res.status(403).json({ error: "Only doctors can add details." });
@@ -46,10 +47,10 @@ const addDoctorDetails = async (req, res) => {
 
 const updateDoctorDetails = async (req, res) => {
   try {
-    const { experience, availabeSlots, email, password, specialization, fee } =
+    const { experience, availabeSlots, availableSlots, email, password, specialization, fee } =
       req.body;
 
-    const doctor = await Doctor.findOne({ doctorId: req.user.userId });
+    const doctor = await Doctor.findOne({ doctorId: req.user._id });
     if (!doctor) {
       return res.status(404).json({ error: "Doctor profile not found." });
     }
@@ -57,21 +58,28 @@ const updateDoctorDetails = async (req, res) => {
     if (experience) {
       doctor.experience = experience;
     }
-    if (availabeSlots) {
-      doctor.availabeSlots = availabeSlots;
+    
+    const slotsToUpdate = availabeSlots || availableSlots;
+    if (slotsToUpdate) {
+      doctor.availabeSlots = slotsToUpdate;
     }
     if (specialization) {
       doctor.specialization = specialization;
     }
-    if (email) {
-      doctor.email = email;
-    }
     if (fee) doctor.fee = fee;
 
-    if (password) {
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
-      doctor.password = hashedPassword;
+    // Email and Password belong to the User model, not the Doctor model
+    if (email || password) {
+      const user = await User.findById(req.user._id);
+      if (user) {
+        if (email) user.email = email;
+        if (password) {
+          const salt = await bcrypt.genSalt(10);
+          const hashedPassword = await bcrypt.hash(password, salt);
+          user.password = hashedPassword;
+        }
+        await user.save();
+      }
     }
 
     await doctor.save();
@@ -81,8 +89,8 @@ const updateDoctorDetails = async (req, res) => {
       doctor,
     });
   } catch (error) {
+    console.error("Error updating doctor details:", error);
     return res.status(500).json({ error: "Server Error" });
-    console.log("error updating details", error);
   }
 };
 

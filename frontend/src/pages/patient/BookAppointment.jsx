@@ -12,6 +12,13 @@ function BookAppointment() {
   const [slot, setSlot] = useState('');
   const [reason, setReason] = useState('');
 
+  React.useEffect(() => {
+    if (!state || !state.doctor) {
+      toast.error("Please select a doctor from the list first.");
+      navigate("/patient/doctors");
+    }
+  }, [state, navigate]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
 

@@ -30,7 +30,7 @@ const bookAppointment = async (req, res) => {
 
     // ✅ Book the appointment
     const newAppointment = new Appointment({
-      patientId: req.user.userId,
+      patientId: req.user._id,
       doctorId,
       slot,
     });

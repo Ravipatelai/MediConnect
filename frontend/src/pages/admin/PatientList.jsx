@@ -11,9 +11,10 @@ function PatientList() {
     try {
       const response = await API.get("/admin/patients");
 
-      console.log("Patients:", response.data);
+      // FIX HERE 👇
+      setPatients(response.data.patients);
 
-      setPatients(response.data.patients); // ✅ FIX HERE
+      console.log("Patients:", response.data);
     } catch (error) {
       console.error("Error fetching patients:", error);
     } finally {

@@ -107,17 +107,17 @@ const upcomingAppointments = async (req, res) => {
     
       status: { $in: ["pending", "confirmed"] }, // Only fetch pending or confirmed appointments
     }).populate({
-    path: "doctorId",
-    populate: {
-      path: "doctorId", // this is the reference inside Doctor model to User
-      select: "name email age gender experience",
-    },
-  });
+      path: "doctorId",
+      populate: {
+        path: "doctorId", // this is the reference inside Doctor model to User
+        select: "name email age gender",
+      },
+    });
 
     return res.status(200).json(appointments);
   } catch (error) {
-    return res.status(500).json({ error: "Internal server error" });
     console.error("Error fetching upcoming appointments:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -138,11 +138,24 @@ const AppointmentHistory = async (req, res) => {
       })
       .sort({ date: -1 });
 
-    const history = appointments.map((appt) => ({
-      doctor: appt.doctorId?.doctorId?.name || "Unknown",
-      date: appt.date.toISOString().split("T")[0],
-      time: appt.slot,
-    }));
+    const history = appointments.map((appt) => {
+      let formattedDate = "N/A";
+      if (appt.date) {
+        try {
+          const d = appt.date instanceof Date ? appt.date : new Date(appt.date);
+          if (!isNaN(d.getTime())) {
+            formattedDate = d.toISOString().split("T")[0];
+          }
+        } catch (e) {
+          console.error("Failed to format date for history:", e);
+        }
+      }
+      return {
+        doctor: appt.doctorId?.doctorId?.name || "Unknown",
+        date: formattedDate,
+        time: appt.slot || "N/A",
+      };
+    });
 
     res.json(history);
   } catch (err) {
