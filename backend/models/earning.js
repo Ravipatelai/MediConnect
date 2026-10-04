@@ -13,8 +13,9 @@ const earningSchema = new mongoose.Schema({
   }],
   amount: {
     type: Number,
-    default: 0,
+    default: 500,
     min: 0,
+    required: true,
   },
   date: {
     type: Date,
