@@ -125,6 +125,8 @@ const registerUser = async (req, res) => {
   }
 };
 
+
+
 // ==============================
 // Login User
 // POST /api/auth/login
